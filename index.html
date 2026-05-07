@@ -1,1065 +1,331 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FN Aim Trainer Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PASSWORD - Jogo Estilo Termo</title>
+    <!-- Carrega o Tailwind CSS para os estilos -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega os ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Burbank+Big+Condensed+Black&family=Inter:wght@400;700;900&display=swap');
-
+        /* Estilos adicionais para esconder a barra de scroll e ajustar cursores */
         body {
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-            background-color: #0f172a;
-            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        .fn-font {
-            font-family: 'Inter', sans-serif; 
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .bg-grid {
-            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        #game-canvas {
-            cursor: none;
-        }
-
-        .btn-fn {
-            transition: all 0.2s;
-            clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
-        }
-        .btn-fn:hover {
-            transform: scale(1.02) translateY(-2px);
-            filter: brightness(1.2);
-        }
-        .btn-fn:active {
-            transform: scale(0.98);
-        }
-
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-
-        /* Improved Range Slider Styling */
-        input[type=range] {
-            -webkit-appearance: none;
-            background: transparent;
-            height: 24px;
-            display: flex;
-            align-items: center;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 14px;
-            width: 14px;
-            border-radius: 50%;
-            background: #38bdf8; /* Sky Blue */
-            cursor: pointer;
-            margin-top: -5px;
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-            transition: transform 0.1s;
-        }
-        input[type=range]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            background: #fff;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
+        .hidden-input {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: #334155;
-            border-radius: 2px;
-        }
-        
-        /* Custom Color Picker */
-        input[type="color"] {
-            -webkit-appearance: none;
-            border: none;
-            width: 100%;
-            height: 32px;
-            border-radius: 6px;
-            overflow: hidden;
-            padding: 0;
-            cursor: pointer;
-        }
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0; 
-        }
-        input[type="color"]::-webkit-color-swatch {
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 6px;
-        }
-
-        /* Checkbox Styling */
-        .custom-checkbox {
-            appearance: none;
-            background-color: #334155;
-            margin: 0;
-            font: inherit;
-            color: currentColor;
-            width: 1.15em;
-            height: 1.15em;
-            border: 1px solid currentColor;
-            border-radius: 0.15em;
-            display: grid;
-            place-content: center;
-            cursor: pointer;
-        }
-        .custom-checkbox::before {
-            content: "";
-            width: 0.65em;
-            height: 0.65em;
-            transform: scale(0);
-            transition: 120ms transform ease-in-out;
-            box-shadow: inset 1em 1em white;
-            transform-origin: center;
-            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-        }
-        .custom-checkbox:checked::before {
-            transform: scale(1);
-        }
-        .custom-checkbox:checked {
-            background-color: #38bdf8;
-            border-color: #38bdf8;
-        }
-
-        /* Rank Styles */
-        .rank-bronze { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.3); }
-        .rank-silver { color: #c0c0c0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.3); }
-        .rank-gold { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-        .rank-platinum { color: #00ffff; text-shadow: 0 0 15px rgba(0, 255, 255, 0.4); }
-        .rank-diamond { color: #b9f2ff; text-shadow: 0 0 20px rgba(185, 242, 255, 0.6); }
-        .rank-elite { color: #00ff00; text-shadow: 0 0 20px rgba(0, 255, 0, 0.6); }
-        .rank-champion { color: #ff8c00; text-shadow: 0 0 25px rgba(255, 140, 0, 0.7); }
-        .rank-unreal { 
-            background: linear-gradient(to right, #a855f7, #ec4899, #a855f7); 
-            background-size: 200%;
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-            filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.5));
-        }
-
-        @keyframes shine {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-
-        .rank-bar-bg { background-color: rgba(255,255,255,0.05); }
-        .rank-bar-fill { 
-            background: linear-gradient(90deg, #fbbf24, #f59e0b);
-            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .negative-score { color: #ef4444; animation: shake 0.3s; }
-        @keyframes pop { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        
-        .hit-marker {
-            position: absolute; pointer-events: none; width: 20px; height: 20px;
-            border-radius: 50%; border: 2px solid #ffff00; animation: pop 0.2s ease-out forwards; z-index: 50;
-        }
-
-        /* Sidebar Transition */
-        #settings-sidebar {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* FIX: Select Dropdown Dark Mode */
-        select option {
-            background-color: #0f172a;
-            color: white;
-            padding: 10px;
+            height: 100%;
+            z-index: 10;
+            cursor: text;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-white h-screen w-screen relative overflow-hidden bg-grid">
+<body class="bg-slate-950 text-slate-100 font-mono selection:bg-emerald-500/30">
 
-    <!-- CANVAS LAYER -->
-    <canvas id="game-canvas" class="absolute top-0 left-0 w-full h-full z-0"></canvas>
-
-    <!-- UI LAYER -->
-    <div id="ui-layer" class="absolute top-0 left-0 w-full h-full z-10 pointer-events-none flex flex-col justify-between p-6">
+    <div id="game-container" class="min-h-screen flex flex-col items-center py-6 px-4">
         
-        <!-- HUD (Top) -->
-        <div id="hud" class="hidden flex justify-between items-start w-full max-w-6xl mx-auto">
-            <div class="glass-panel p-4 rounded-xl skew-x-[-10deg] min-w-[150px]">
-                <div class="skew-x-[10deg] text-center">
-                    <p class="text-xs text-gray-400 font-bold tracking-widest">PONTOS</p>
-                    <p id="score-display" class="text-4xl fn-font text-yellow-400 transition-colors">0</p>
-                </div>
-            </div>
+        <!-- Cabeçalho -->
+        <header class="flex items-center justify-center gap-3 mb-6 w-full max-w-lg border-b border-slate-800 pb-4">
+            <div id="icon-lock"><i data-lucide="lock" class="text-emerald-500 w-8 h-8"></i></div>
+            <div id="icon-unlock" class="hidden"><i data-lucide="unlock" class="text-emerald-500 w-8 h-8"></i></div>
+            <h1 class="text-3xl font-black tracking-wider bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                PASSWORD
+            </h1>
+        </header>
 
-            <div class="glass-panel p-2 px-8 rounded-b-xl border-t-0">
-                <p id="timer-display" class="text-5xl fn-font text-white tracking-widest drop-shadow-lg">01:00</p>
-            </div>
+        <!-- Dica / Info -->
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 mb-6 w-full max-w-lg flex items-start gap-3 text-sm text-slate-400">
+            <i data-lucide="info" class="w-5 h-5 flex-shrink-0 text-cyan-500"></i>
+            <p>
+                Descubra a senha oculta. <strong class="text-emerald-400">Maiúsculas e minúsculas fazem diferença!</strong> Pode conter símbolos como @, #, *, etc.
+            </p>
+        </div>
 
-            <div class="glass-panel p-4 rounded-xl skew-x-[10deg] min-w-[150px]">
-                <div class="skew-x-[-10deg] text-center">
-                    <p class="text-xs text-gray-400 font-bold tracking-widest">PRECISÃO</p>
-                    <p id="accuracy-display" class="text-4xl fn-font text-cyan-400">100%</p>
-                </div>
+        <!-- Mensagens de Feedback -->
+        <div class="h-8 mb-4 w-full max-w-lg flex justify-center">
+            <div id="message-box" class="hidden px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-2 animate-pulse">
+                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                <span id="message-text"></span>
             </div>
         </div>
-    </div>
 
-    <!-- MAIN MENU (FULL SCREEN) -->
-    <div id="main-menu" class="absolute inset-0 z-20 flex flex-col bg-slate-950 transition-opacity duration-300">
-        
-        <!-- SIDEBAR: CROSSHAIR LAB (Hidden by default) -->
-        <div id="settings-sidebar" class="absolute top-0 left-0 h-full w-96 glass-panel z-50 transform -translate-x-full border-r border-cyan-500/30 flex flex-col pointer-events-auto shadow-[10px_0_50px_rgba(0,0,0,0.5)]">
+        <!-- Grid de Jogo com Input Invisível -->
+        <div class="relative w-full max-w-lg flex flex-col gap-2 mb-8" id="grid-wrapper">
+            <!-- Input escondido sobre o grid para capturar digitação -->
+            <input
+                id="hidden-input"
+                type="text"
+                class="hidden-input"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                autofocus
+            />
             
-            <div class="bg-slate-900/90 p-5 border-b border-white/5 flex justify-between items-center">
-                <h2 class="text-xl fn-font text-cyan-400 flex items-center gap-2">
-                    <span class="text-2xl">✜</span> EDITOR DE MIRA
-                </h2>
-                <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white transition-colors text-2xl font-bold">&times;</button>
-            </div>
-
-            <div class="p-6 flex-1 overflow-y-auto space-y-6">
-                
-                <!-- Preview Box -->
-                <div class="relative w-full aspect-video bg-gray-800 rounded-lg overflow-hidden border border-white/10 shadow-inner group">
-                    <div class="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900"></div>
-                    <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
-                    <canvas id="crosshair-preview" width="200" height="150" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></canvas>
-                    <div class="absolute bottom-2 right-2 text-[10px] text-gray-500 font-mono">PREVIEW</div>
-                </div>
-
-                <!-- Quick Presets -->
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="setPreset('dot')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded text-xs font-bold border border-white/5 transition-colors">PONTO</button>
-                    <button onclick="setPreset('cross')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded text-xs font-bold border border-white/5 transition-colors">CRUZ PRO</button>
-                    <button onclick="setPreset('default')" class="bg-slate-800 hover:bg-slate-700 py-2 rounded text-xs font-bold border border-white/5 transition-colors">PADRÃO</button>
-                </div>
-
-                <!-- Controls -->
-                <div class="space-y-5">
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-gray-400 uppercase flex justify-between">Cor da Mira</label>
-                        <div class="flex gap-2">
-                            <input type="color" id="ch-color" value="#00ff00" oninput="updateCrosshairPreview()" class="h-8 flex-1">
-                        </div>
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-bold text-gray-400"><span class="uppercase">Tamanho</span><span id="val-size" class="text-cyan-400">6</span></div>
-                        <input type="range" id="ch-size" min="0" max="20" value="6" oninput="updateCrosshairPreview()">
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-bold text-gray-400"><span class="uppercase">Espessura</span><span id="val-thick" class="text-cyan-400">2</span></div>
-                        <input type="range" id="ch-thick" min="1" max="6" value="2" oninput="updateCrosshairPreview()">
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-xs font-bold text-gray-400"><span class="uppercase">Gap (Abertura)</span><span id="val-gap" class="text-cyan-400">0</span></div>
-                        <input type="range" id="ch-gap" min="0" max="15" value="0" oninput="updateCrosshairPreview()">
-                    </div>
-
-                    <div class="flex items-center justify-between pt-2 border-t border-white/5">
-                        <label class="text-xs font-bold text-gray-400 uppercase cursor-pointer" for="ch-outline">Borda (Outline)</label>
-                        <input type="checkbox" id="ch-outline" class="custom-checkbox text-cyan-400" onchange="updateCrosshairPreview()" checked>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-gray-400 uppercase cursor-pointer" for="ch-dot">Ponto Central</label>
-                        <input type="checkbox" id="ch-dot" class="custom-checkbox text-cyan-400" onchange="updateCrosshairPreview()">
-                    </div>
-                </div>
-
-                <!-- Sensitivity -->
-                <div class="mt-4 pt-4 border-t border-white/10">
-                        <h3 class="text-xs font-bold text-yellow-400 mb-3 uppercase tracking-wider">Sensibilidade</h3>
-                        <div class="space-y-3">
-                        <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">Eixo X (%)</span><span id="val-sens-x" class="text-white">10.0%</span></div>
-                            <input type="range" id="sens-x" min="1" max="100" value="10" step="0.1" class="w-full">
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-gray-400">Eixo Y (%)</span><span id="val-sens-y" class="text-white">10.0%</span></div>
-                            <input type="range" id="sens-y" min="1" max="100" value="10" step="0.1" class="w-full">
-                        </div>
-                    </div>
-                </div>
+            <div id="grid-container" class="flex flex-col gap-2 w-full">
+                <!-- Os quadrados serão gerados aqui pelo JavaScript -->
             </div>
         </div>
 
-        <!-- CENTER PANEL: MODES & PLAY (FULL SCREEN) -->
-        <div class="w-full h-full flex flex-col relative bg-grid overflow-hidden">
-            
-            <!-- Background Decoration -->
-            <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 opacity-90"></div>
-            <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-600/10 blur-[100px] rounded-full pointer-events-none"></div>
-            <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-600/10 blur-[100px] rounded-full pointer-events-none"></div>
-
-            <div class="relative z-10 w-full h-full flex flex-col p-8 md:p-12">
-                <!-- Open Sidebar Button -->
-                <button onclick="toggleSidebar()" class="absolute top-8 left-8 flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold text-cyan-400 border border-white/10 transition-colors pointer-events-auto shadow-lg hover:shadow-cyan-500/20 z-20">
-                    <span class="text-lg">⚙️</span> EDITOR & SENSI
-                </button>
-
-                <div class="flex flex-col items-center justify-center mb-10 mt-4 flex-none">
-                    <h1 class="text-7xl md:text-9xl fn-font text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-yellow-400 drop-shadow-2xl italic tracking-tighter">
-                        AIM TRAINER
-                    </h1>
-                    <div class="flex items-center gap-3 mt-2">
-                        <p class="text-gray-400 tracking-[0.2em] font-bold text-sm">RANKED & HARDCORE</p>
-                        <div class="bg-green-500/10 border border-green-500/30 px-2 py-0.5 rounded text-green-400 text-[10px] font-bold uppercase animate-pulse">
-                            Online V2.4
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Game Settings -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl mx-auto w-full pointer-events-auto flex-none">
-                    <div class="bg-gray-900/80 p-5 rounded-xl border border-white/10 hover:border-yellow-400/50 transition-colors backdrop-blur-sm group">
-                        <label class="block text-xs text-yellow-400 mb-2 font-bold uppercase tracking-wider group-hover:text-yellow-300">Dificuldade</label>
-                        <select id="difficulty-select" class="w-full bg-transparent border-b border-gray-600 text-white text-lg font-bold focus:border-yellow-400 outline-none pb-1 cursor-pointer">
-                            <option value="0.8">Iniciante</option>
-                            <option value="1.0" selected>Normal</option>
-                            <option value="1.3">Difícil</option>
-                            <option value="1.8">FNCS (Pro)</option>
-                        </select>
-                    </div>
-                    <div class="bg-gray-900/80 p-5 rounded-xl border border-white/10 hover:border-yellow-400/50 transition-colors backdrop-blur-sm group">
-                        <label class="block text-xs text-cyan-400 mb-2 font-bold uppercase tracking-wider group-hover:text-cyan-300">Duração</label>
-                        <select id="duration-select" class="w-full bg-transparent border-b border-gray-600 text-white text-lg font-bold focus:border-cyan-400 outline-none pb-1 cursor-pointer">
-                            <option value="30">30s Blitz</option>
-                            <option value="60" selected>60s Padrão</option>
-                            <option value="120">2min Treino</option>
-                        </select>
-                    </div>
-                    <div class="bg-gray-900/80 p-5 rounded-xl border border-white/10 hover:border-yellow-400/50 transition-colors backdrop-blur-sm group">
-                        <label class="block text-xs text-purple-400 mb-2 font-bold uppercase tracking-wider group-hover:text-purple-300">Distância do Alvo</label>
-                        <input type="range" id="target-size" min="15" max="60" value="35" class="w-full accent-purple-500 h-2 bg-gray-700 rounded-full cursor-pointer mt-2">
-                    </div>
-                </div>
-
-                <!-- MODES GRID -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 w-full max-w-7xl mx-auto pointer-events-auto flex-1 content-center">
-                    <button onclick="selectMode('gridshot')" class="group relative h-full max-h-60 bg-gradient-to-br from-indigo-950/80 to-slate-900/80 rounded-2xl border border-white/10 hover:border-yellow-400 transition-all overflow-hidden btn-fn text-center p-6 flex flex-col items-center justify-center backdrop-blur-sm hover:bg-indigo-900/50">
-                        <div class="absolute inset-0 bg-yellow-400/0 group-hover:bg-yellow-400/5 transition-colors"></div>
-                        <div class="text-5xl mb-4 opacity-70 group-hover:scale-110 group-hover:opacity-100 transition-all duration-300 transform">🎯</div>
-                        <h3 class="text-3xl fn-font text-white group-hover:text-yellow-300 tracking-wide">Gridshot</h3>
-                        <p class="text-xs text-gray-400 mt-2 uppercase tracking-widest font-bold group-hover:text-white">Velocidade</p>
-                    </button>
-
-                    <button onclick="selectMode('dynamic')" class="group relative h-full max-h-60 bg-gradient-to-br from-indigo-950/80 to-slate-900/80 rounded-2xl border border-white/10 hover:border-green-400 transition-all overflow-hidden btn-fn text-center p-6 flex flex-col items-center justify-center backdrop-blur-sm hover:bg-indigo-900/50">
-                        <div class="absolute inset-0 bg-green-400/0 group-hover:bg-green-400/5 transition-colors"></div>
-                        <div class="text-5xl mb-4 opacity-70 group-hover:scale-110 group-hover:opacity-100 transition-all duration-300 transform">🚀</div>
-                        <h3 class="text-3xl fn-font text-white group-hover:text-green-300 tracking-wide">Dinâmico</h3>
-                        <p class="text-xs text-gray-400 mt-2 uppercase tracking-widest font-bold group-hover:text-white">Flick Shot</p>
-                    </button>
-
-                    <button onclick="selectMode('tracking')" class="group relative h-full max-h-60 bg-gradient-to-br from-indigo-950/80 to-slate-900/80 rounded-2xl border border-white/10 hover:border-cyan-400 transition-all overflow-hidden btn-fn text-center p-6 flex flex-col items-center justify-center backdrop-blur-sm hover:bg-indigo-900/50">
-                        <div class="absolute inset-0 bg-cyan-400/0 group-hover:bg-cyan-400/5 transition-colors"></div>
-                        <div class="text-5xl mb-4 opacity-70 group-hover:scale-110 group-hover:opacity-100 transition-all duration-300 transform">⚡</div>
-                        <h3 class="text-3xl fn-font text-white group-hover:text-cyan-300 tracking-wide">Tracking</h3>
-                        <p class="text-xs text-gray-400 mt-2 uppercase tracking-widest font-bold group-hover:text-white">Rastreio</p>
-                    </button>
-
-                    <button onclick="selectMode('reaction')" class="group relative h-full max-h-60 bg-gradient-to-br from-indigo-950/80 to-slate-900/80 rounded-2xl border border-white/10 hover:border-red-500 transition-all overflow-hidden btn-fn text-center p-6 flex flex-col items-center justify-center backdrop-blur-sm hover:bg-indigo-900/50">
-                        <div class="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/5 transition-colors"></div>
-                        <div class="text-5xl mb-4 opacity-70 group-hover:scale-110 group-hover:opacity-100 transition-all duration-300 transform">⏱️</div>
-                        <h3 class="text-3xl fn-font text-white group-hover:text-red-400 tracking-wide">Reflexo</h3>
-                        <p class="text-xs text-gray-400 mt-2 uppercase tracking-widest font-bold group-hover:text-white">Reação</p>
-                    </button>
-                </div>
-            </div>
+        <!-- Controles -->
+        <div id="controls-container" class="w-full max-w-lg flex flex-col gap-4">
+            <button 
+                id="btn-submit"
+                class="font-bold py-4 rounded-lg transition-colors flex items-center justify-center gap-2 bg-slate-800 text-slate-500 cursor-not-allowed"
+                disabled
+            >
+                TENTAR ACESSO (Enter)
+            </button>
         </div>
-    </div>
 
-    <!-- GAME OVER SCREEN (RANKED) -->
-    <div id="game-over" class="hidden absolute inset-0 z-30 flex items-center justify-center bg-black/85 backdrop-blur-xl">
-        <div class="glass-panel p-0 rounded-2xl max-w-lg w-full text-center border border-white/10 animate-[pop_0.4s_cubic-bezier(0.175,0.885,0.32,1.275)] relative overflow-hidden shadow-2xl">
-            
-            <div id="rank-header-bg" class="h-32 bg-gradient-to-b from-purple-900/50 to-transparent absolute top-0 w-full"></div>
-
-            <div class="relative z-10 p-8">
-                <h2 class="text-2xl fn-font text-white/90 mb-6 tracking-widest">RESUMO DA PARTIDA</h2>
-                
-                <div class="mb-8 transform transition-all hover:scale-105 duration-300">
-                    <h1 id="rank-title" class="text-7xl fn-font rank-unreal mb-0 drop-shadow-2xl">UNREAL</h1>
-                    <p id="rank-points" class="text-xl font-mono text-white/80 font-bold tracking-widest">45,230</p>
-                </div>
-
-                <!-- Rank Progress Bar -->
-                <div class="mb-8 bg-black/30 p-4 rounded-xl border border-white/5">
-                    <div class="flex justify-between text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">
-                        <span id="current-rank-label">Champion</span>
-                        <span id="next-rank-label">Unreal</span>
-                    </div>
-                    <div class="h-3 w-full rank-bar-bg rounded-full overflow-hidden">
-                        <div id="rank-progress" class="h-full rank-bar-fill w-[0%] shadow-[0_0_10px_rgba(251,191,36,0.5)]"></div>
-                    </div>
-                    <p id="points-to-next" class="text-xs text-yellow-400 mt-2 text-right font-mono">Faltam 500 pts</p>
-                </div>
-
-                <div class="grid grid-cols-3 gap-3 mb-8">
-                    <div class="bg-gray-800/40 p-3 rounded border border-white/5">
-                        <p class="text-[10px] text-gray-500 uppercase">Precisão</p>
-                        <p id="final-accuracy" class="text-xl font-bold text-white">95%</p>
-                    </div>
-                    <div class="bg-gray-800/40 p-3 rounded border border-white/5">
-                        <p class="text-[10px] text-gray-500 uppercase">KPS</p>
-                        <p id="final-kps" class="text-xl font-bold text-white">4.2</p>
-                    </div>
-                    <div class="bg-gray-800/40 p-3 rounded border border-white/5">
-                        <p class="text-[10px] text-gray-500 uppercase">Erros</p>
-                        <p id="final-misses" class="text-xl font-bold text-red-400">0</p>
-                    </div>
-                </div>
-
-                <button onclick="returnToMenu()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-black py-4 px-6 rounded-lg text-lg uppercase tracking-widest transition-transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(250,204,21,0.3)]">
-                    Jogar Novamente
-                </button>
-            </div>
+        <!-- Botão de Reiniciar (Escondido por padrão) -->
+        <div id="restart-container" class="w-full max-w-lg flex flex-col gap-4 hidden">
+            <button 
+                id="btn-restart"
+                class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-8 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 animate-bounce hover:animate-none"
+            >
+                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                NOVA TENTATIVA
+            </button>
         </div>
+
+        <!-- Legenda -->
+        <footer class="mt-12 text-xs text-slate-500 flex gap-4">
+           <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 inline-block rounded-sm"></span> Correto</span>
+           <span class="flex items-center gap-1"><span class="w-3 h-3 bg-yellow-500 inline-block rounded-sm"></span> Posição Errada</span>
+           <span class="flex items-center gap-1"><span class="w-3 h-3 bg-slate-700 inline-block rounded-sm"></span> Não Existe</span>
+        </footer>
     </div>
 
     <script>
-        // --- CONFIG & STATE ---
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d', { alpha: true });
-        
-        // UI Refs
-        const mainMenu = document.getElementById('main-menu');
-        const hud = document.getElementById('hud');
-        const gameOverScreen = document.getElementById('game-over');
-        
-        // Audio
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        // Ranks
-        const RANKS = [
-            { name: "BRONZE", min: 0, color: "rank-bronze", barColor: "#cd7f32" },
-            { name: "PRATA", min: 5000, color: "rank-silver", barColor: "#c0c0c0" },
-            { name: "OURO", min: 12000, color: "rank-gold", barColor: "#ffd700" },
-            { name: "PLATINA", min: 20000, color: "rank-platinum", barColor: "#00ffff" },
-            { name: "DIAMANTE", min: 30000, color: "rank-diamond", barColor: "#b9f2ff" },
-            { name: "ELITE", min: 45000, color: "rank-elite", barColor: "#00ff00" },
-            { name: "CHAMPION", min: 60000, color: "rank-champion", barColor: "#ff8c00" },
-            { name: "UNREAL", min: 80000, color: "rank-unreal", barColor: "#a855f7" }
+        // --- BASE DE DADOS E CONFIGURAÇÕES ---
+        const PASSWORD_DATABASE = [
+            "CT2024#", "admin12", "S3nha@1", "P@sswrd", "qwerty1", 
+            "M@trix1", "root#12", "s3cr3t0", "Xablau1", "Messi10", 
+            "F12024!", "Verao25", "Natal24", "admin@1", "master1", 
+            "mudar@1", "senha!2", "Goku24!", "br@sil1", "Deus#07", 
+            "t3rmin4", "d4t4b4s", "h@cker1", "1234567", "Flamen9", 
+            "Gremio7", "Santos!", "Brasil!"
         ];
+        const MAX_GUESSES = 6;
 
-        let state = {
-            isPlaying: false,
-            mode: null,
-            difficulty: 1.0,
-            score: 0,
-            shotsFired: 0,
-            shotsHit: 0,
-            misses: 0,
-            timeLeft: 60,
-            targets: [],
-            // Mouse state for pointer lock
-            mouseX: window.innerWidth / 2,
-            mouseY: window.innerHeight / 2,
-            lastFrameTime: 0,
-            spawnTimer: 0,
-            trackingScoreTimer: 0
-        };
+        // --- ESTADO DO JOGO ---
+        let targetPassword = '';
+        let guesses = [];
+        let currentGuess = '';
+        let gameOver = false;
+        let gameWon = false;
+        let messageTimeout = null;
 
-        // Crosshair Config Object
-        let chConfig = {
-            color: '#00ff00',
-            size: 6,
-            thickness: 2,
-            gap: 0,
-            dot: false,
-            outline: true
-        };
+        // --- ELEMENTOS DO DOM ---
+        const gameContainer = document.getElementById('game-container');
+        const gridContainer = document.getElementById('grid-container');
+        const hiddenInput = document.getElementById('hidden-input');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnRestart = document.getElementById('btn-restart');
+        const controlsContainer = document.getElementById('controls-container');
+        const restartContainer = document.getElementById('restart-container');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const iconLock = document.getElementById('icon-lock');
+        const iconUnlock = document.getElementById('icon-unlock');
 
-        // Sensitivity Multiplier (Internal calc based on percentage)
-        let sensMultiplierX = 1.0;
-        let sensMultiplierY = 1.0;
+        // --- INICIALIZAÇÃO DOS ÍCONES LUCIDE ---
+        lucide.createIcons();
 
-        // --- SIDEBAR TOGGLE ---
-        function toggleSidebar() {
-            const sidebar = document.getElementById('settings-sidebar');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.remove('-translate-x-full');
-            } else {
-                sidebar.classList.add('-translate-x-full');
+        // --- LÓGICA DE AVALIAÇÃO ---
+        function evaluateGuess(guess, target) {
+            const result = new Array(target.length).fill('gray');
+            const targetChars = target.split('');
+            const guessChars = guess.split('');
+
+            // Primeira passagem: verde
+            for (let i = 0; i < target.length; i++) {
+                if (guessChars[i] === targetChars[i]) {
+                    result[i] = 'green';
+                    targetChars[i] = null;
+                    guessChars[i] = null;
+                }
             }
+
+            // Segunda passagem: amarelo
+            for (let i = 0; i < target.length; i++) {
+                if (guessChars[i] !== null && targetChars.includes(guessChars[i])) {
+                    result[i] = 'yellow';
+                    targetChars[targetChars.indexOf(guessChars[i])] = null;
+                }
+            }
+
+            return result;
         }
 
-        // --- RESIZE ---
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            // Recenter aim if not playing or if needed
-            if (!state.isPlaying) {
-                state.mouseX = canvas.width / 2;
-                state.mouseY = canvas.height / 2;
-            }
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // --- INPUT HANDLING WITH POINTER LOCK ---
-        
-        // Listen to raw mouse movement
-        document.addEventListener('mousemove', (e) => {
-            if (document.pointerLockElement === canvas && state.isPlaying) {
-                // Use Sensitivity multipliers
-                state.mouseX += e.movementX * sensMultiplierX;
-                state.mouseY += e.movementY * sensMultiplierY;
-
-                // Clamp to screen
-                state.mouseX = Math.max(0, Math.min(canvas.width, state.mouseX));
-                state.mouseY = Math.max(0, Math.min(canvas.height, state.mouseY));
-            } else if (!state.isPlaying) {
-                // UI Mode - update internal tracker just in case
-                // NOTE: In UI mode, we don't draw the game crosshair usually, but we could
-            }
-        });
-
-        document.addEventListener('mousedown', (e) => {
-            if (!state.isPlaying) return;
-            // Re-acquire lock if lost and clicking
-            if (document.pointerLockElement !== canvas) {
-                canvas.requestPointerLock();
-                return;
-            }
-
-            if (state.mode === 'tracking') {
-                state.isTracking = true;
-                return;
-            }
-            shoot();
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (state.mode === 'tracking') state.isTracking = false;
-        });
-
-        // Detect Pointer Lock change to pause/menu
-        document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement !== canvas && state.isPlaying) {
-                // User pressed ESC or lost focus
-                endGame(true); // True = cancelled/paused (here just end for simplicity)
-            }
-        });
-
-        // --- SETTINGS UI LOGIC ---
-
-        function updateCrosshairPreview() {
-            // Update Data
-            chConfig.color = document.getElementById('ch-color').value;
-            chConfig.size = parseInt(document.getElementById('ch-size').value);
-            chConfig.thickness = parseInt(document.getElementById('ch-thick').value);
-            chConfig.gap = parseInt(document.getElementById('ch-gap').value);
-            chConfig.dot = document.getElementById('ch-dot').checked;
-            chConfig.outline = document.getElementById('ch-outline').checked;
-
-            // Update Labels
-            document.getElementById('val-size').innerText = chConfig.size;
-            document.getElementById('val-thick').innerText = chConfig.thickness;
-            document.getElementById('val-gap').innerText = chConfig.gap;
-
-            // Draw Preview
-            const pCanvas = document.getElementById('crosshair-preview');
-            const pCtx = pCanvas.getContext('2d');
-            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+        // --- FUNÇÕES DE RENDERIZAÇÃO ---
+        function getCellClasses(char, status, isActiveRow, isActiveCell) {
+            let base = "flex items-center justify-center font-bold text-lg sm:text-2xl rounded-md transition-all duration-300 w-full h-10 sm:h-14 ";
             
-            drawCrosshair(pCtx, pCanvas.width/2, pCanvas.height/2);
-        }
-        
-        function setPreset(type) {
-            if(type === 'dot') {
-                document.getElementById('ch-size').value = 0;
-                document.getElementById('ch-thick').value = 2;
-                document.getElementById('ch-gap').value = 0;
-                document.getElementById('ch-dot').checked = true;
-                document.getElementById('ch-outline').checked = true;
-                document.getElementById('ch-color').value = '#00ff00';
-            } else if (type === 'cross') {
-                document.getElementById('ch-size').value = 6;
-                document.getElementById('ch-thick').value = 2;
-                document.getElementById('ch-gap').value = 2;
-                document.getElementById('ch-dot').checked = false;
-                document.getElementById('ch-outline').checked = true;
-                document.getElementById('ch-color').value = '#00ffff';
-            } else {
-                // default
-                document.getElementById('ch-size').value = 8;
-                document.getElementById('ch-thick').value = 2;
-                document.getElementById('ch-gap').value = 4;
-                document.getElementById('ch-dot').checked = false;
-                document.getElementById('ch-outline').checked = true;
-                document.getElementById('ch-color').value = '#ffffff';
-            }
-            updateCrosshairPreview();
-        }
-
-        // Init Sensi Sliders
-        document.getElementById('sens-x').addEventListener('input', (e) => {
-            document.getElementById('val-sens-x').innerText = e.target.value + "%";
-            // Map 1-100% to a multiplier. Let's say 10% = 0.5 mult, 50% = 1.0, 100% = 3.0?
-            // Actually Fortnite 10% is usually considered "medium-low" on 800dpi.
-            // Let's do a simple linear scale: 1% = 0.1, 10% = 1.0 (Base), 100% = 10.0
-            // Adjusted for web pointer movement usually being 1:1 pixel
-            sensMultiplierX = parseFloat(e.target.value) / 10; 
-        });
-
-        document.getElementById('sens-y').addEventListener('input', (e) => {
-            document.getElementById('val-sens-y').innerText = e.target.value + "%";
-            sensMultiplierY = parseFloat(e.target.value) / 10;
-        });
-        
-        // Initialize preview
-        updateCrosshairPreview();
-
-
-        // --- DRAW FUNCTIONS ---
-
-        function drawCrosshair(ctxTarget, x, y) {
-            const size = chConfig.size;
-            const gap = chConfig.gap;
-            const thickness = chConfig.thickness;
-
-            // Draw Outline first (behind)
-            if (chConfig.outline) {
-                ctxTarget.lineWidth = thickness + 2; // +2 for outline stroke width
-                ctxTarget.strokeStyle = 'black';
-                
-                if (size > 0) {
-                    ctxTarget.beginPath();
-                    // Right
-                    ctxTarget.moveTo(x + gap - 1, y);
-                    ctxTarget.lineTo(x + gap + size + 1, y);
-                    // Left
-                    ctxTarget.moveTo(x - gap + 1, y);
-                    ctxTarget.lineTo(x - gap - size - 1, y);
-                    // Top
-                    ctxTarget.moveTo(x, y - gap + 1);
-                    ctxTarget.lineTo(x, y - gap - size - 1);
-                    // Bottom
-                    ctxTarget.moveTo(x, y + gap - 1);
-                    ctxTarget.lineTo(x, y + gap + size + 1);
-                    ctxTarget.stroke();
-                }
-                
-                if (chConfig.dot) {
-                    ctxTarget.beginPath();
-                    ctxTarget.arc(x, y, (thickness/2) + 1.5, 0, Math.PI * 2); // Slightly larger
-                    ctxTarget.fillStyle = 'black';
-                    ctxTarget.fill();
-                }
-            }
-
-            // Draw Main Color
-            ctxTarget.fillStyle = chConfig.color;
-            ctxTarget.strokeStyle = chConfig.color;
-            ctxTarget.lineWidth = thickness;
+            if (status === 'green') return base + "bg-emerald-500 border-2 border-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)]";
+            if (status === 'yellow') return base + "bg-yellow-500 border-2 border-yellow-500 text-white shadow-[0_0_10px_rgba(234,179,8,0.5)]";
+            if (status === 'gray') return base + "bg-slate-700 border-2 border-slate-600 text-slate-300 opacity-70";
             
-            // Only draw lines if size > 0
-            if (size > 0) {
-                ctxTarget.beginPath();
-                // Right
-                ctxTarget.moveTo(x + gap, y);
-                ctxTarget.lineTo(x + gap + size, y);
-                // Left
-                ctxTarget.moveTo(x - gap, y);
-                ctxTarget.lineTo(x - gap - size, y);
-                // Top
-                ctxTarget.moveTo(x, y - gap);
-                ctxTarget.lineTo(x, y - gap - size);
-                // Bottom
-                ctxTarget.moveTo(x, y + gap);
-                ctxTarget.lineTo(x, y + gap + size);
-                ctxTarget.stroke();
-            }
-
-            // Draw Dot
-            if (chConfig.dot) {
-                ctxTarget.beginPath();
-                ctxTarget.arc(x, y, thickness/2 + 0.5, 0, Math.PI * 2);
-                ctxTarget.fill();
-            }
+            if (isActiveCell) return base + "bg-slate-800 border-b-4 border-slate-700 border-b-emerald-500 text-emerald-400 shadow-[0_4px_10px_rgba(52,211,153,0.15)] animate-pulse";
+            
+            if (isActiveRow && char) return base + "bg-slate-800 border-2 border-emerald-400 text-emerald-400 scale-105 shadow-[0_0_8px_rgba(52,211,153,0.3)]";
+            
+            return base + "bg-slate-800 border-2 border-slate-700 text-slate-100";
         }
 
+        function renderGrid() {
+            let html = '';
+            const passLength = targetPassword.length;
 
-        // --- GAME LOGIC ---
+            for (let i = 0; i < MAX_GUESSES; i++) {
+                const isCurrentRow = i === guesses.length;
+                const guess = guesses[i];
+                const displayStr = guess || (isCurrentRow ? currentGuess : '');
+                const evaluated = guess ? evaluateGuess(guess, targetPassword) : null;
 
-        class Target {
-            constructor(x, y, radius, mode, difficulty) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.mode = mode;
-                this.difficulty = difficulty;
-                this.life = 1.0;
-                this.spawnAnimation = 0;
+                html += `<div class="grid gap-1.5 sm:gap-2" style="grid-template-columns: repeat(${passLength}, minmax(0, 1fr))">`;
                 
-                let baseSpeed = 5 * difficulty;
-                if (difficulty > 1.5) baseSpeed *= 1.5;
-
-                this.dx = (Math.random() - 0.5) * baseSpeed;
-                this.dy = (Math.random() - 0.5) * baseSpeed;
-                this.angle = Math.random() * Math.PI * 2;
-                this.angleSpeed = (Math.random() * 0.1) * (difficulty * difficulty);
-            }
-
-            update(dt) {
-                if (this.spawnAnimation < 1) {
-                    this.spawnAnimation += dt * 15;
-                    if (this.spawnAnimation > 1) this.spawnAnimation = 1;
-                }
-
-                if (this.mode === 'tracking' || this.mode === 'dynamic') {
-                    this.x += this.dx;
-                    this.y += this.dy;
-                    this.angle += dt * 2 * this.difficulty; 
+                for (let j = 0; j < passLength; j++) {
+                    const char = displayStr[j] || '';
+                    const status = evaluated ? evaluated[j] : null;
+                    const isActiveCell = isCurrentRow && j === currentGuess.length && !gameOver;
                     
-                    const wobble = (this.difficulty > 1.2) ? 4 : 2;
-                    this.x += Math.sin(this.angle) * wobble; 
-                    this.y += Math.cos(this.angle) * wobble;
-
-                    if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.dx *= -1;
-                    if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.dy *= -1;
-
-                    if (this.x < 0) this.x = this.radius;
-                    if (this.x > canvas.width) this.x = canvas.width - this.radius;
-                    if (this.y < 0) this.y = this.radius;
-                    if (this.y > canvas.height) this.y = canvas.height - this.radius;
-                } 
-                
-                if (this.mode === 'reaction') {
-                    const decaySpeed = 0.8 * (this.difficulty * 1.2);
-                    this.life -= dt * decaySpeed; 
+                    const cellClass = getCellClasses(char, status, isCurrentRow, isActiveCell);
+                    html += `<div class="${cellClass}">${char}</div>`;
                 }
-            }
-
-            draw(ctx) {
-                const lifeFactor = (this.mode === 'reaction' ? Math.max(0, this.life) : 1);
-                const r = Math.max(0, this.radius * this.spawnAnimation * lifeFactor);
                 
-                if (r <= 0.5) return;
-
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
-                
-                let centerColor = config.baseColor;
-                if(this.mode === 'dynamic') centerColor = '#10b981'; 
-                if(this.mode === 'reaction') centerColor = '#f43f5e'; 
-
-                const gradient = ctx.createRadialGradient(this.x, this.y, r * 0.1, this.x, this.y, r);
-                gradient.addColorStop(0, '#ffffff');
-                gradient.addColorStop(0.4, centerColor);
-                gradient.addColorStop(1, '#020617');
-                
-                ctx.fillStyle = gradient;
-                ctx.fill();
-                
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-                ctx.stroke();
-                
-                if (this.mode === 'reaction') {
-                    ctx.beginPath();
-                    const barRadius = Math.max(0, r + 4);
-                    ctx.arc(this.x, this.y, barRadius, -Math.PI/2, (-Math.PI/2) + (Math.PI * 2 * Math.max(0, this.life)));
-                    ctx.strokeStyle = this.life < 0.3 ? '#ef4444' : '#fbbf24';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-                }
+                html += `</div>`;
             }
-
-            isHovered(mx, my) {
-                const dist = Math.hypot(this.x - mx, this.y - my);
-                return dist < this.radius;
-            }
+            gridContainer.innerHTML = html;
         }
 
-        let config = { baseColor: '#22d3ee' };
+        function updateUI() {
+            renderGrid();
 
-        function playSound(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
+            // Atualiza o estado do botão
+            if (currentGuess.length === targetPassword.length && !gameOver) {
+                btnSubmit.disabled = false;
+                btnSubmit.className = "font-bold py-4 rounded-lg transition-colors flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white active:scale-95";
+            } else {
+                btnSubmit.disabled = true;
+                btnSubmit.className = "font-bold py-4 rounded-lg transition-colors flex items-center justify-center gap-2 bg-slate-800 text-slate-500 cursor-not-allowed";
+            }
 
-            if (type === 'hit') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(1200, now);
-                osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
-                gainNode.gain.setValueAtTime(0.2, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
-            } else if (type === 'spawn') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(300, now);
-                gainNode.gain.setValueAtTime(0.02, now);
-                gainNode.gain.linearRampToValueAtTime(0, now + 0.05);
-                osc.start(now); osc.stop(now + 0.05);
-            } else if (type === 'miss') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
-                gainNode.gain.setValueAtTime(0.1, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                osc.start(now); osc.stop(now + 0.15);
-            } else if (type === 'tick') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(800, now);
-                gainNode.gain.setValueAtTime(0.03, now);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-                osc.start(now); osc.stop(now + 0.03);
+            // Mostra/Esconde controles de fim de jogo
+            if (gameOver) {
+                hiddenInput.style.display = 'none';
+                controlsContainer.classList.add('hidden');
+                restartContainer.classList.remove('hidden');
+            } else {
+                hiddenInput.style.display = 'block';
+                controlsContainer.classList.remove('hidden');
+                restartContainer.classList.add('hidden');
+            }
+
+            // Atualiza ícone do cadeado
+            if (gameWon) {
+                iconLock.classList.add('hidden');
+                iconUnlock.classList.remove('hidden');
+            } else {
+                iconLock.classList.remove('hidden');
+                iconUnlock.classList.add('hidden');
             }
         }
 
-        function createExplosion(x, y) {
-            const el = document.createElement('div');
-            el.className = 'hit-marker';
-            el.style.left = x - 10 + 'px';
-            el.style.top = y - 10 + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 200);
-        }
-
-        function spawnTarget() {
-            const padding = 80;
-            const x = padding + Math.random() * (canvas.width - padding * 2);
-            const y = padding + Math.random() * (canvas.height - padding * 2);
-            const size = parseInt(document.getElementById('target-size').value);
-            const finalSize = state.difficulty > 1.5 ? size * 0.9 : size;
-            const t = new Target(x, y, finalSize, state.mode, state.difficulty);
-            state.targets.push(t);
-            playSound('spawn');
-        }
-
-        function shoot() {
-            state.shotsFired++;
-            let hit = false;
+        function showMessage(msg, isSuccess = false) {
+            if (messageTimeout) clearTimeout(messageTimeout);
             
-            for (let i = state.targets.length - 1; i >= 0; i--) {
-                if (state.targets[i].isHovered(state.mouseX, state.mouseY)) {
-                    state.score += 100 * state.difficulty; 
-                    state.shotsHit++;
-                    createExplosion(state.targets[i].x, state.targets[i].y);
-                    state.targets.splice(i, 1);
-                    playSound('hit');
-                    hit = true;
-                    
-                    if (state.mode === 'gridshot') spawnTarget();
-                    if (state.mode === 'dynamic' && state.targets.length < 4) spawnTarget();
-                    break;
-                }
+            messageText.textContent = msg;
+            messageBox.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'bg-red-500/20', 'text-red-400');
+            
+            if (isSuccess) {
+                messageBox.classList.add('bg-emerald-500/20', 'text-emerald-400');
+            } else {
+                messageBox.classList.add('bg-red-500/20', 'text-red-400');
             }
 
-            if (!hit) {
-                state.misses++;
-                playSound('miss');
-                if (state.difficulty > 1.0) {
-                    const penalty = 50 * state.difficulty;
-                    state.score -= penalty;
-                    document.getElementById('score-display').classList.add('negative-score');
-                    setTimeout(() => document.getElementById('score-display').classList.remove('negative-score'), 300);
-                }
-            }
-            updateHUD();
+            messageTimeout = setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
         }
 
-        function updateHUD() {
-            document.getElementById('score-display').innerText = Math.max(0, Math.floor(state.score));
-            let acc = 0;
-            if (state.mode !== 'tracking') {
-                acc = state.shotsFired > 0 ? Math.round((state.shotsHit / state.shotsFired) * 100) : 100;
-                accuracyDisplay.innerText = acc + "%";
-            }
+        // --- LÓGICA DO JOGO ---
+        function startNewGame() {
+            targetPassword = PASSWORD_DATABASE[Math.floor(Math.random() * PASSWORD_DATABASE.length)];
+            guesses = [];
+            currentGuess = '';
+            gameOver = false;
+            gameWon = false;
+            hiddenInput.value = '';
+            messageBox.classList.add('hidden');
+            
+            updateUI();
+            setTimeout(() => hiddenInput.focus(), 100);
         }
 
-        function selectMode(mode) {
-            state.mode = mode;
-            // Initiate Pointer Lock
-            canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock;
-            canvas.requestPointerLock();
-            
-            startGame();
-        }
+        function submitGuess() {
+            if (gameOver) return;
 
-        function startGame() {
-            mainMenu.classList.add('hidden');
-            gameOverScreen.classList.add('hidden');
-            hud.classList.remove('hidden');
-            
-            state.isPlaying = true;
-            state.score = 0;
-            state.shotsFired = 0;
-            state.shotsHit = 0;
-            state.misses = 0;
-            state.targets = [];
-            state.timeLeft = parseInt(document.getElementById('duration-select').value);
-            state.difficulty = parseFloat(document.getElementById('difficulty-select').value);
-            
-            // Reset Mouse to center
-            state.mouseX = canvas.width / 2;
-            state.mouseY = canvas.height / 2;
-            
-            const targetSizeVal = parseInt(document.getElementById('target-size').value);
-            
-            if (state.mode === 'gridshot') {
-                for(let i=0; i<3; i++) spawnTarget();
-            } else if (state.mode === 'dynamic') {
-                for(let i=0; i<4; i++) spawnTarget();
-            } else if (state.mode === 'tracking') {
-                const t = new Target(canvas.width/2, canvas.height/2, targetSizeVal, 'tracking', state.difficulty);
-                state.targets.push(t);
-            } else if (state.mode === 'reaction') {
-                state.spawnTimer = 0;
-            }
-
-            state.lastFrameTime = performance.now();
-            requestAnimationFrame(gameLoop);
-            
-            if (state.gameTimer) clearInterval(state.gameTimer);
-            state.gameTimer = setInterval(() => {
-                state.timeLeft--;
-                let mins = Math.floor(state.timeLeft / 60);
-                let secs = state.timeLeft % 60;
-                timerDisplay.innerText = `${mins < 10 ? '0'+mins : mins}:${secs < 10 ? '0'+secs : secs}`;
-                
-                if (state.timeLeft <= 0) {
-                    endGame();
-                }
-            }, 1000);
-        }
-
-        function getRankData(score) {
-            for (let i = RANKS.length - 1; i >= 0; i--) {
-                if (score >= RANKS[i].min) {
-                    return { current: RANKS[i], next: RANKS[i+1] || null };
-                }
-            }
-            return { current: RANKS[0], next: RANKS[1] };
-        }
-
-        function endGame(cancelled = false) {
-            state.isPlaying = false;
-            clearInterval(state.gameTimer);
-            document.exitPointerLock();
-            
-            if (cancelled) {
-                // If cancelled (ESC), just go back to menu without score
-                returnToMenu();
+            if (currentGuess.length < targetPassword.length) {
+                showMessage(`A senha precisa ter ${targetPassword.length} caracteres!`);
                 return;
             }
 
-            hud.classList.add('hidden');
-            gameOverScreen.classList.remove('hidden');
+            guesses.push(currentGuess);
             
-            const finalScore = Math.floor(Math.max(0, state.score));
-            const {current: currentRank, next: nextRank} = getRankData(finalScore);
-
-            const rankTitle = document.getElementById('rank-title');
-            rankTitle.innerText = currentRank.name;
-            rankTitle.className = `text-7xl fn-font mb-0 drop-shadow-2xl ${currentRank.color}`;
-            document.getElementById('rank-points').innerText = `${finalScore.toLocaleString()} PTS`;
-            document.getElementById('rank-header-bg').style.background = `linear-gradient(to bottom, ${currentRank.barColor}66, transparent)`;
-
-            if (nextRank) {
-                document.getElementById('current-rank-label').innerText = currentRank.name;
-                document.getElementById('next-rank-label').innerText = nextRank.name;
-                const range = nextRank.min - currentRank.min;
-                const progress = finalScore - currentRank.min;
-                const percentage = Math.min(100, Math.max(0, (progress / range) * 100));
-                document.getElementById('rank-progress').style.width = `${percentage}%`;
-                document.getElementById('rank-progress').style.background = `linear-gradient(90deg, ${currentRank.barColor}, ${nextRank.barColor})`;
-                document.getElementById('points-to-next').innerText = `Faltam ${(nextRank.min - finalScore).toLocaleString()} para ${nextRank.name}`;
-            } else {
-                document.getElementById('rank-progress').style.width = "100%";
-                document.getElementById('points-to-next').innerText = "LENDÁRIO";
+            if (currentGuess === targetPassword) {
+                gameWon = true;
+                gameOver = true;
+                showMessage('Acesso Concedido! Você descobriu a senha.', true);
+            } else if (guesses.length >= MAX_GUESSES) {
+                gameOver = true;
+                showMessage(`Acesso Negado! A senha era: ${targetPassword}`);
             }
 
-            let acc = state.shotsFired > 0 ? ((state.shotsHit/state.shotsFired)*100).toFixed(1) : 0;
-            document.getElementById('final-accuracy').innerText = acc + "%";
-            document.getElementById('final-misses').innerText = state.misses;
-
-            const duration = parseInt(document.getElementById('duration-select').value) - state.timeLeft;
-            const kps = duration > 0 ? (state.shotsHit / duration).toFixed(2) : 0;
-            document.getElementById('final-kps').innerText = kps;
+            currentGuess = '';
+            hiddenInput.value = '';
+            updateUI();
         }
 
-        function returnToMenu() {
-            gameOverScreen.classList.add('hidden');
-            hud.classList.add('hidden');
-            mainMenu.classList.remove('hidden');
-            state.isPlaying = false;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function gameLoop(timestamp) {
-            if (!state.isPlaying) return;
-
-            const dt = (timestamp - state.lastFrameTime) / 1000;
-            state.lastFrameTime = timestamp;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = state.targets.length - 1; i >= 0; i--) {
-                let t = state.targets[i];
-                t.update(dt);
-                t.draw(ctx);
-
-                if (state.mode === 'reaction') {
-                    if (t.life <= 0) {
-                        state.targets.splice(i, 1);
-                        state.misses++;
-                        if (state.difficulty > 1.0) state.score -= 50 * state.difficulty;
-                        updateHUD();
-                    }
-                }
-                
-                if (state.mode === 'tracking') {
-                    state.shotsFired++;
-                    if (t.isHovered(state.mouseX, state.mouseY)) {
-                        ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 4; ctx.stroke();
-                        state.shotsHit++;
-                        state.score += 15 * dt * 60 * state.difficulty; 
-                        state.trackingScoreTimer += dt;
-                        if (state.trackingScoreTimer > 0.1) {
-                            playSound('tick');
-                            state.trackingScoreTimer = 0;
-                        }
-                        updateHUD();
-                    }
-                    accuracyDisplay.innerText = Math.round((state.shotsHit / state.shotsFired) * 100) + "%";
-                }
+        // --- LISTENERS DE EVENTOS ---
+        hiddenInput.addEventListener('input', (e) => {
+            if (gameOver) return;
+            const value = e.target.value.replace(/\s/g, ''); // Evita espaços
+            if (value.length <= targetPassword.length) {
+                currentGuess = value;
+                // Força o valor do input a acompanhar o currentGuess (caso cole texto maior)
+                hiddenInput.value = currentGuess; 
+                updateUI();
             }
+        });
 
-            if (state.mode === 'reaction') {
-                state.spawnTimer += dt;
-                const spawnRate = 0.5 / state.difficulty; 
-                if (state.spawnTimer > spawnRate) {
-                    if (state.targets.length < 6) spawnTarget();
-                    state.spawnTimer = 0;
-                }
-            } else if (state.mode === 'dynamic') {
-                 if (state.targets.length < 4) spawnTarget();
+        hiddenInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitGuess();
             }
+        });
 
-            // Draw Custom Crosshair
-            drawCrosshair(ctx, state.mouseX, state.mouseY);
+        btnSubmit.addEventListener('click', submitGuess);
+        btnRestart.addEventListener('click', startNewGame);
 
-            requestAnimationFrame(gameLoop);
-        }
+        // Garante que o input ganhe foco ao clicar na área do jogo
+        gameContainer.addEventListener('click', () => {
+            if (!gameOver) {
+                hiddenInput.focus();
+            }
+        });
+
+        // --- INICIAR JOGO AO CARREGAR ---
+        window.onload = startNewGame;
+
     </script>
 </body>
 </html>
